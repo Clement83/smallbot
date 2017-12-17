@@ -1,0 +1,6 @@
+{
+    "port": "COM10",
+    "board": "arduino:avr:pro",
+    "configuration": "cpu=8MHzatmega328",
+    "sketch": "boat.ino"
+}
