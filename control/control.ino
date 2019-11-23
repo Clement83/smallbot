@@ -14,8 +14,8 @@
 #define SWITCH2 A7
 #define BTN_PUSH A6
 /*threadhold*/
-#define MIN_POTAR_VAL 48
-#define MAX_POTAR_VAL 341
+#define MIN_POTAR_VAL 0
+#define MAX_POTAR_VAL 230
 
 /* nRF24l01 ------------------------------------------------------------------*/
 // NOTE: the "LL" at the end of the constant is "LongLong" type
@@ -26,7 +26,10 @@ int joystick[5]; // 2 element array holding Joystick readings
 /* ---------------------------------------------------------------------------*/
 Encoder myEnc(3, 4);
 
-int barreValue = 512;
+#define BARRE_MIDDLE 590
+#define BARRE_MIN 0
+#define BARRE_MAX 1180
+int barreValue = BARRE_MIDDLE;
 
 #define NB_LED 6
 int ledPins[] = {
@@ -43,12 +46,7 @@ void setup(){
   radio.setRetries(0, 15);
   radio.setPALevel(RF24_PA_HIGH);
   radio.openWritingPipe(pipe);
-
-  barreValue = 512;
-  pinMode(SWITCH1, INPUT);
-  pinMode(SWITCH2, INPUT);
-  pinMode(BTN_PUSH, INPUT);
-
+  barreValue = BARRE_MIDDLE;
   for (int thisLed = 0; thisLed < NB_LED; thisLed++) {
     pinMode(ledPins[thisLed], OUTPUT);
   }
@@ -57,15 +55,24 @@ void setup(){
 void loop(){
   updateBarre();
 
-  joystick[0] = barreValue;// analogRead(JOYSTICK_X);
+  joystick[0] = map(barreValue, BARRE_MIN, BARRE_MAX, 0, 100) ;// analogRead(JOYSTICK_X);
   joystick[1] = map(analogRead(ACC_POTAR), MIN_POTAR_VAL, MAX_POTAR_VAL, 0, 100);
-  joystick[2] = 0; 
-  joystick[3] = 0;
-  joystick[4] = 0;
-  //joystick[1] = analogRead(ACC_POTAR);
+  joystick[2] = analogRead(SWITCH1) > 100 ? 1 : 0; 
+  joystick[3] = analogRead(SWITCH2) > 100 ? 1 : 0;
+  joystick[4] = analogRead(BTN_PUSH) > 100 ? 1 : 0;
   
-  Serial.print("Valeur lue : ");
-  Serial.println(joystick[1]);
+  Serial.print("Barre value : ");
+  Serial.println(barreValue);
+  Serial.print("Barre value send : ");
+  Serial.println(joystick[0]);
+  // Serial.print("Valeur lue : ");
+  // Serial.println(analogRead(ACC_POTAR));
+  // Serial.print("Joy 2 : ");
+  // Serial.println(joystick[2]);
+  // Serial.print("joy 3 : ");
+  // Serial.println(joystick[3]);
+  // Serial.print("joy 4 : ");
+  // Serial.println(joystick[4]);
   
   updateBarrGraph();
   
@@ -97,10 +104,10 @@ void updateBarre()
 {
   barreValue += 10 * getSensRotation();
 
-  if(barreValue > 1023) {
-    barreValue = 1023;
-  } else if(barreValue < 0){
-    barreValue = 0;
+  if(barreValue > BARRE_MAX) {
+    barreValue = BARRE_MAX;
+  } else if(barreValue < BARRE_MIN){
+    barreValue = BARRE_MIN;
   }
 }
 
