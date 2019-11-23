@@ -16,6 +16,8 @@
 #define PIN_GOUVERNAIL 8
 #define PIN_MOTEUR 6
 
+#define ZERO_THREHOLD 0
+
 /* nRF24l01 ------------------------------------------------------------------*/
 // NOTE: the "LL" at the end of the constant is "LongLong" type
 const uint64_t pipe = 0xE8E8F0F0E1LL; // Define the transmit pipe
@@ -46,23 +48,27 @@ void setup(){
 
 void loop(){
     
-  if ( radio.available() )
-  {
-    // Read the data payload until we've received everything
-    bool done = false;
-    while (!done)
+    while (radio.available())
     {
     // Fetch the data payload
-      done = radio.read(joystick, sizeof(joystick));
+      radio.read(joystick, sizeof(joystick));
       Serial.print("X = ");
       Serial.print(joystick[0]);
       Serial.print(" Y = ");      
       Serial.println(joystick[1]);
+      Serial.print(" Phare = ");      
+      Serial.println(joystick[2]);
+      Serial.print(" Giro = ");      
+      Serial.println(joystick[3]);
+      Serial.print(" buzzer = ");      
+      Serial.println(joystick[4]);
 
-      int dir = map(joystick[0], 0, 1024, 130, 80);
+      int dir = map(joystick[0], 0, 100, 115 + ZERO_THREHOLD, 65 + ZERO_THREHOLD);
       //int acc = map(map(joystick[1], 512, 1024, 0, 512), 0,512, 0,200); //crawler radio
       int acc = map(joystick[1], 0, 100, 0, 200);
     
+      Serial.print(" real angle = ");      
+      Serial.println(dir);
       monServo.write(dir);
       analogWrite(PIN_MOTEUR, acc);
 
@@ -87,19 +93,6 @@ void loop(){
 
       delay(50);
     }
-    counter = 0;
-  }
-  else
-  {    
-    if(++counter>10) {
-      Serial.println("No radio available");
-      monServo.write(105);
-      analogWrite(PIN_MOTEUR, 0);
-      digitalWrite(10, 0);
-    }else {
-      delay(100);
-    }
-  }
 }
 
 int p=50;
