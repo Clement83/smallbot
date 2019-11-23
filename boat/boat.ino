@@ -10,8 +10,8 @@
 #define CE_PIN 4
 #define CSN_PIN 5
 
-#define LED_ORANGE 2
-#define LED_WHITE 3
+#define LED_ORANGE 3
+#define LED_WHITE 2
 
 #define PIN_GOUVERNAIL 8
 #define PIN_MOTEUR 6
@@ -73,7 +73,7 @@ void loop(){
       analogWrite(PIN_MOTEUR, acc);
 
       if(joystick[2] == 1) {
-        analogWrite(LED_ORANGE, 200);
+        girophare();
       } else {
         analogWrite(LED_ORANGE, 0);
       }
@@ -95,15 +95,26 @@ void loop(){
     }
 }
 
-int p=50;
+int giroCompteur = 0;
+void girophare() 
+{
+  giroCompteur++;
+  if((giroCompteur % 20) > 10) {
+    analogWrite(LED_ORANGE, 200);
+  } else {
+    analogWrite(LED_ORANGE, 0);
+  }
+}
+
+int p=20;
 void buzzer()
 {
-  p--; // on incémente p à chaque boucle de loop();
-  if (p<10){ // teste la limite de p
-    p=50; // on le remet à 10
-  }
-  digitalWrite(10,0); // état bas
-  delayMicroseconds(p); //on attend p milli-secondes
-  digitalWrite(10,1); // état haut
-  delayMicroseconds(p); // on attend p millisecondes
+  //p--; // on incémente p à chaque boucle de loop();
+  //if (p<10){ // teste la limite de p
+  //  p=50; // on le remet à 10
+  //}
+  digitalWrite(10, HIGH);// Faire du bruit
+  delay(10);// Attendre 10ms
+  digitalWrite(10, LOW);// Silence
+  delay(10);// Attendre 10ms
 }
